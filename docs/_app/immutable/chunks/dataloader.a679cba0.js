@@ -1,0 +1,1 @@
+import{r as e,w as i}from"./index.17d7a712.js";import{d as r}from"./scheduler.0355dd38.js";const s=[{title:"Et si on réinventait l'éducation des garçons?",date:"2025-05-07",description:"description",src:"",image:""},{title:"Histoire des mères",date:"2025-05-08",description:"",src:"",image:""}];var t=null;function n(){return r(t)}function d(){t=e(i(s))}export{n as g,d as i};
