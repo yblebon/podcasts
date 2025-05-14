@@ -38,7 +38,7 @@
                         <h5 class="card-title">{podcast.title}</h5>
                         <p class="card-text">Participants: {podcast.participants}</p>
                         <audio controls class="audio-player">
-                            <source src="https://file-examples.com/storage/fe17a1467f68237299aa605/2017/11/file_example_MP3_700KB.mp3" type="audio/mpeg">
+                            <source src="{podcast.src}" type="audio/mpeg">
                             Your browser does not support the audio element.
                         </audio>
                     </div>
