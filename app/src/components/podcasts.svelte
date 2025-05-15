@@ -33,7 +33,7 @@
 
    <div class="col">
                 <div class="card audio-card h-100">
-                    <img src="https://via.placeholder.com/300x150?text=Song+Cover" class="card-img-top" alt="Song Cover">
+                    <img src="{podcast.image}" class="card-img-top" alt="Song Cover">
                     <div class="card-body">
                         <h5 class="card-title">{podcast.title}</h5>
                         <p class="card-text">Participants: {podcast.participants}</p>
