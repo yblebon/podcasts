@@ -1,70 +1,182 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-       <meta charset="utf-8" />
-       <link rel="icon" href="./favicon.png" />
-       <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <style>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Podcast Gallery</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .podcast-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .podcast-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+            transition: transform 0.2s;
+        }
+        .podcast-card:hover {
+            transform: scale(1.02);
+        }
+        .podcast-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+        .podcast-content {
+            padding: 15px;
+        }
+        .podcast-content h3 {
+            margin: 0 0 10px;
+            color: #333;
+            font-size: 1.2em;
+        }
+        .tags {
+            margin-bottom: 10px;
+        }
+        .tags span {
+            background: #e0e0e0;
+            border-radius: 5px;
+            padding: 5px 10px;
+            font-size: 0.8em;
+            margin-right: 5px;
+            display: inline-block;
+        }
+        .description {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 15px;
+        }
+        .audio-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .audio-controls button {
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 0.9em;
+        }
+        .audio-controls button:hover {
+            background: #0056b3;
+        }
+        .audio-controls input[type="range"] {
+            width: 60px;
+        }
+        .time-display {
+            font-size: 0.9em;
+            color: #333;
+        }
+        audio {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Podcast Gallery</h1>
+    <div class="podcast-grid" id="podcast-grid"></div>
 
-/* outfit-latin-400-normal */
-@font-face {
-  font-family: 'Outfit';
-  font-style: normal;
-  font-display: swap;
-  font-weight: 400;
-  src: url(https://cdn.jsdelivr.net/fontsource/fonts/outfit@latest/latin-400-normal.woff2) format('woff2'), url(https://cdn.jsdelivr.net/fontsource/fonts/outfit@latest/latin-400-normal.woff) format('woff');
-  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
-}
-</style>
+    <script>
+        // Function to format time in MM:SS
+        function formatTime(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${minutes}:${secs < 10 ? '0' : ''}${secs}`;
+        }
 
-<link
-  href="https://cdn.jsdelivr.net/npm/css.gg/icons/icons.css"
-  rel="stylesheet"
-/>
- 
-		<meta name="viewport" content="width=device-width, initial-scale=1" />
-		
-		<link href="./_app/immutable/assets/2.70eb5843.css" rel="stylesheet">
-		<link rel="modulepreload" href="./_app/immutable/entry/start.3c37bd41.js">
-		<link rel="modulepreload" href="./_app/immutable/chunks/entry.22ba1094.js">
-		<link rel="modulepreload" href="./_app/immutable/chunks/scheduler.6879c3d9.js">
-		<link rel="modulepreload" href="./_app/immutable/chunks/index.f2a2d25b.js">
-		<link rel="modulepreload" href="./_app/immutable/chunks/paths.fe758e8c.js">
-		<link rel="modulepreload" href="./_app/immutable/entry/app.b2153f3e.js">
-		<link rel="modulepreload" href="./_app/immutable/chunks/index.9c0ec925.js">
-		<link rel="modulepreload" href="./_app/immutable/nodes/0.ec29ae78.js">
-		<link rel="modulepreload" href="./_app/immutable/chunks/dataloader.ab2c823f.js">
-		<link rel="modulepreload" href="./_app/immutable/nodes/2.f1551d08.js"><title>The podcasts</title><!-- HEAD_undefined_START --><!-- HEAD_undefined_END --><!-- HEAD_svelte-1w2rdbr_START --><meta name="description" content="The podcasts"><!-- HEAD_svelte-1w2rdbr_END -->
-	</head>
-	<body class="bg-secondary" data-sveltekit-preload-data="hover">
-		<div style="display: contents">     <div class="container-sm"> <div class="container text-center mt-4 text-primary-emphasis" data-svelte-h="svelte-glnnln"><h1>The podcasts</h1></div> <div class="container my-5"><div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4"><div class="col"><div class="card audio-card h-100 svelte-socw1e"><img src="https://xenogeneic-cyan-boar.myfilebase.com/ipfs/QmXNBz7ZpgYAZXC8rdTztg3CCiZYD9ys6jry7aG5jD6BK8" class="card-img-top svelte-socw1e" alt="Song Cover"> <div class="card-body"><h5 class="card-title">Cheap headline &amp; lazy writing</h5> <p class="card-text">Participants: Me</p> <audio controls class="audio-player svelte-socw1e"><source src="https://xenogeneic-cyan-boar.myfilebase.com/ipfs/QmQ362AXybnS6NA4S1vwofR4FTESp1hfzYkXBCkYNGGcdq" type="audio/mpeg">
-                            Your browser does not support the audio element.</audio> </div></div> </div><div class="col"><div class="card audio-card h-100 svelte-socw1e"><img src="https://xenogeneic-cyan-boar.myfilebase.com/ipfs/QmPPLJ9wWcrVDyeFm2Dor4Dye2XCodeqVUiVWhWeZUJrfR" class="card-img-top svelte-socw1e" alt="Song Cover"> <div class="card-body"><h5 class="card-title">Bonjour Journal Vocal</h5> <p class="card-text">Participants: Me</p> <audio controls class="audio-player svelte-socw1e"><source src="https://xenogeneic-cyan-boar.myfilebase.com/ipfs/Qme8drfrZdLD9x8WMo4Gus4XFTfh4bUG7o8gBoSyjnhQsM" type="audio/mpeg">
-                            Your browser does not support the audio element.</audio> </div></div> </div><div class="col"><div class="card audio-card h-100 svelte-socw1e"><img src="" class="card-img-top svelte-socw1e" alt="Song Cover"> <div class="card-body"><h5 class="card-title">title 1</h5> <p class="card-text">Participants: boubou &amp; bibi</p> <audio controls class="audio-player svelte-socw1e"><source src="https://xenogeneic-cyan-boar.myfilebase.com/ipfs/QmaSpKYYiUEijpY2xNt5idMd5RAWsEz3bahm84g82TR8h8" type="audio/mpeg">
-                            Your browser does not support the audio element.</audio> </div></div> </div><div class="col"><div class="card audio-card h-100 svelte-socw1e"><img src="" class="card-img-top svelte-socw1e" alt="Song Cover"> <div class="card-body"><h5 class="card-title">title 2</h5> <p class="card-text">Participants: djaja &amp; djodo</p> <audio controls class="audio-player svelte-socw1e"><source src="https://xenogeneic-cyan-boar.myfilebase.com/ipfs/QmfY8Wferg7xjH9tHBusknsQK9ARi62mry6QqyJMPcmBwM" type="audio/mpeg">
-                            Your browser does not support the audio element.</audio> </div></div> </div></div></div></div> 
-			
-			<script>
-				{
-					__sveltekit_dw6tv7 = {
-						base: new URL(".", location).pathname.slice(0, -1)
-					};
+        // Fetch podcast data from GitHub
+        fetch('https://raw.githubusercontent.com/yblebon/datasources/main/podcasts.json') // Replace with your actual GitHub raw JSON URL
+            .then(response => {
+                if (!response.ok) throw new Error('Failed to fetch podcast data');
+                return response.json();
+            })
+            .then(data => {
+                const podcastGrid = document.getElementById('podcast-grid');
 
-					const element = document.currentScript.parentElement;
+                // Create podcast cards dynamically
+                data.forEach(podcast => {
+                    const card = document.createElement('div');
+                    card.className = 'podcast-card';
+                    card.innerHTML = `
+                        <img src="${podcast.cover}" alt="Podcast Cover">
+                        <div class="podcast-content">
+                            <h3>${podcast.title}</h3>
+                            <div class="tags">
+                                ${podcast.tags.map(tag => `<span>${tag}</span>`).join('')}
+                            </div>
+                            <p class="description">${podcast.description}</p>
+                            <div class="audio-controls">
+                                <button class="play-pause">Play</button>
+                                <input type="range" class="volume" min="0" max="1" step="0.1" value="1">
+                                <span class="time-display">0:00 / 0:00</span>
+                                <audio src="${podcast.audio}"></audio>
+                            </div>
+                        </div>
+                    `;
+                    podcastGrid.appendChild(card);
 
-					Promise.all([
-						import("./_app/immutable/entry/start.3c37bd41.js"),
-						import("./_app/immutable/entry/app.b2153f3e.js")
-					]).then(([kit, app]) => {
-						kit.start(app, element, {
-							node_ids: [0, 2],
-							data: [null,null],
-							form: null,
-							error: null
-						});
-					});
-				}
-			</script>
-		</div>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-	</body>
+                    // Audio control logic
+                    const audio = card.querySelector('audio');
+                    const playPauseBtn = card.querySelector('.play-pause');
+                    const volumeSlider = card.querySelector('.volume');
+                    const timeDisplay = card.querySelector('.time-display');
+
+                    // Update duration when metadata is loaded
+                    audio.addEventListener('loadedmetadata', () => {
+                        timeDisplay.textContent = `0:00 / ${formatTime(audio.duration)}`;
+                    });
+
+                    // Update current time during playback
+                    audio.addEventListener('timeupdate', () => {
+                        timeDisplay.textContent = `${formatTime(audio.currentTime)} / ${formatTime(audio.duration)}`;
+                    });
+
+                    // Play/Pause toggle
+                    playPauseBtn.addEventListener('click', () => {
+                        if (audio.paused) {
+                            audio.play();
+                            playPauseBtn.textContent = 'Pause';
+                        } else {
+                            audio.pause();
+                            playPauseBtn.textContent = 'Play';
+                        }
+                    });
+
+                    // Volume control
+                    volumeSlider.addEventListener('input', () => {
+                        audio.volume = volumeSlider.value;
+                    });
+
+                    // Reset button text when audio ends
+                    audio.addEventListener('ended', () => {
+                        playPauseBtn.textContent = 'Play';
+                        timeDisplay.textContent = `0:00 / ${formatTime(audio.duration)}`;
+                    });
+                });
+            })
+            .catch(error => {
+                console.error('Error loading podcasts:', error);
+                document.getElementById('podcast-grid').innerHTML = '<p>Error loading podcasts. Please try again later.</p>';
+            });
+    </script>
+</body>
 </html>
