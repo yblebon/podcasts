@@ -3,180 +3,481 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Podcast Gallery</title>
+    <title>Podcasts</title>
     <style>
+        /* Modern, light theme */
         body {
-            font-family: Arial, sans-serif;
-            margin: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
             padding: 20px;
-            background-color: #f4f4f4;
+            background: #f7fafc;
+            color: #2d3748;
+            line-height: 1.6;
+        }
+        header {
+            text-align: center;
+            padding: 40px 0;
         }
         h1 {
-            text-align: center;
-            color: #333;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #1a202c;
+            margin: 0;
         }
-        .podcast-grid {
+        .filter-controls {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .filter-controls label {
+            font-size: 1rem;
+            font-weight: 500;
+            color: #4a5568;
+        }
+        .filter-controls select {
+            padding: 8px 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            color: #2d3748;
+            background: #ffffff;
+            cursor: pointer;
+            transition: border-color 0.2s ease;
+        }
+        .filter-controls select:focus {
+            outline: none;
+            border-color: #2b6cb0;
+        }
+        .podcast-list {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-            max-width: 1200px;
-            margin: 0 auto;
+            gap: 24px;
+            padding: 20px 0;
         }
-        .podcast-card {
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            overflow: hidden;
-            transition: transform 0.2s;
+        .podcast {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
-        .podcast-card:hover {
-            transform: scale(1.02);
+        .podcast:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
         }
-        .podcast-card img {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
+        .podcast.hidden {
+            display: none;
         }
-        .podcast-content {
-            padding: 15px;
+        .podcast h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #2b6cb0;
+            margin: 0 0 12px;
         }
-        .podcast-content h3 {
-            margin: 0 0 10px;
-            color: #333;
-            font-size: 1.2em;
+        .podcast p {
+            margin: 8px 0;
+            font-size: 1rem;
+            color: #4a5568;
+        }
+        .podcast img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 12px 0;
         }
         .tags {
-            margin-bottom: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 8px 0;
         }
-        .tags span {
-            background: #e0e0e0;
-            border-radius: 5px;
-            padding: 5px 10px;
-            font-size: 0.8em;
-            margin-right: 5px;
-            display: inline-block;
-        }
-        .description {
-            color: #666;
-            font-size: 0.9em;
-            margin-bottom: 15px;
+        .tag {
+            background: #e2e8f0;
+            color: #2d3748;
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 0.875rem;
+            font-weight: 500;
         }
         .audio-controls {
             display: flex;
             align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
+            gap: 12px;
+            margin: 12px 0;
         }
-        .audio-controls button {
-            background: #007bff;
-            color: white;
+        .play-pause {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #2b6cb0;
             border: none;
-            border-radius: 5px;
-            padding: 8px 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             cursor: pointer;
-            font-size: 0.9em;
+            transition: background 0.2s ease, transform 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
-        .audio-controls button:hover {
-            background: #0056b3;
+        .play-pause:hover {
+            background: #2c5282;
+            transform: scale(1.05);
         }
-        .audio-controls input[type="range"] {
-            width: 60px;
+        .play-pause svg {
+            width: 20px;
+            height: 20px;
+            fill: #ffffff;
         }
-        .time-display {
-            font-size: 0.9em;
-            color: #333;
+        .volume-control, .progress-control {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            position: relative;
         }
-        audio {
-            display: none;
+        .volume-control input[type="range"],
+        .progress-control input[type="range"] {
+            width: 100px;
+            height: 6px;
+            border-radius: 3px;
+            background: #e2e8f0;
+            accent-color: #2b6cb0;
+            cursor: pointer;
+            appearance: none;
+        }
+        .volume-control input[type="range"]::-webkit-slider-thumb,
+        .progress-control input[type="range"]::-webkit-slider-thumb {
+            appearance: none;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #2b6cb0;
+            cursor: pointer;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+        }
+        .volume-control input[type="range"]::-moz-range-thumb,
+        .progress-control input[type="range"]::-moz-range-thumb {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #2b6cb0;
+            cursor: pointer;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+            border: none;
+        }
+        .volume-control svg {
+            width: 20px;
+            height: 20px;
+            fill: #4a5568;
+        }
+        .volume-control .tooltip {
+            visibility: hidden;
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #2d3748;
+            color: #ffffff;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            white-space: nowrap;
+        }
+        .volume-control:hover .tooltip {
+            visibility: visible;
+        }
+        .progress-time {
+            font-size: 0.875rem;
+            color: #718096;
+        }
+        .loading, .error, .no-results {
+            text-align: center;
+            font-size: 1rem;
+            color: #718096;
+            padding: 20px;
+        }
+        .error {
+            color: #e53e3e;
+        }
+        /* Responsive adjustments */
+        @media (max-width: 600px) {
+            .podcast-list {
+                grid-template-columns: 1fr;
+            }
+            .podcast {
+                padding: 16px;
+            }
+            h1 {
+                font-size: 2rem;
+            }
+            .audio-controls {
+                flex-wrap: wrap;
+            }
+            .volume-control input[type="range"],
+            .progress-control input[type="range"] {
+                width: 80px;
+            }
         }
     </style>
 </head>
 <body>
-    <h1>Podcast Gallery</h1>
-    <div class="podcast-grid" id="podcast-grid"></div>
+    <header>
+        <h1>Podcasts</h1>
+    </header>
+    <div class="filter-controls">
+        <label for="tag-filter">Filter by Tag:</label>
+        <select id="tag-filter">
+            <option value="all">All</option>
+        </select>
+    </div>
+    <div id="podcast-list" class="podcast-list">
+        <p class="loading">Loading podcasts...</p>
+    </div>
 
     <script>
-        // Function to format time in MM:SS
-        function formatTime(seconds) {
-            const minutes = Math.floor(seconds / 60);
-            const secs = Math.floor(seconds % 60);
-            return `${minutes}:${secs < 10 ? '0' : ''}${secs}`;
+        let allPodcasts = [];
+        let uniqueTags = new Set(['all']);
+
+        async function fetchPodcasts() {
+            console.log('Starting fetchPodcasts at', new Date().toISOString());
+            const podcastList = document.getElementById('podcast-list');
+            const tagFilter = document.getElementById('tag-filter');
+            try {
+                console.log('Fetching JSON from https://raw.githubusercontent.com/yblebon/datasources/main/podcasts.json');
+                const response = await fetch('https://raw.githubusercontent.com/yblebon/datasources/main/podcasts.json');
+                console.log('Fetch response status:', response.status, response.statusText);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                const podcasts = await response.json();
+                console.log('Received JSON data:', podcasts);
+                
+                // Clear loading message
+                podcastList.innerHTML = '';
+                
+                // Check if podcasts is an array
+                if (!Array.isArray(podcasts)) {
+                    throw new Error('Invalid data format: Expected an array');
+                }
+                console.log(`Found ${podcasts.length} podcasts`);
+                
+                // Store podcasts
+                allPodcasts = podcasts;
+                
+                // Collect unique tags
+                podcasts.forEach(podcast => {
+                    const tags = podcast.tags;
+                    if (Array.isArray(tags) && tags.length > 0) {
+                        tags.forEach(tag => uniqueTags.add(tag));
+                    } else if (typeof tags === 'string' && tags) {
+                        uniqueTags.add(tags);
+                        console.warn(`Tags for podcast "${podcast.title || 'Untitled'}" is a string ("${tags}"). Treating as single tag.`);
+                    } else {
+                        console.warn(`No valid tags found for podcast "${podcast.title || 'Untitled'}". Skipping tags for filter.`);
+                    }
+                });
+                console.log('Collected unique tags:', Array.from(uniqueTags));
+                
+                // Populate tag filter
+                uniqueTags.forEach(tag => {
+                    const option = document.createElement('option');
+                    option.value = tag;
+                    option.textContent = tag === 'all' ? 'All' : tag;
+                    tagFilter.appendChild(option);
+                });
+                
+                // Render podcasts
+                renderPodcasts(podcasts);
+                
+                // Set up filter event
+                tagFilter.addEventListener('change', () => {
+                    const selectedTag = tagFilter.value;
+                    console.log(`Filter changed to tag: ${selectedTag}`);
+                    const filteredPodcasts = selectedTag === 'all'
+                        ? allPodcasts
+                        : allPodcasts.filter(podcast => {
+                            const tags = podcast.tags;
+                            if (Array.isArray(tags)) {
+                                return tags.includes(selectedTag);
+                            } else if (typeof tags === 'string') {
+                                return tags === selectedTag;
+                            }
+                            return false;
+                        });
+                    console.log(`Filtered ${filteredPodcasts.length} podcasts for tag: ${selectedTag}`);
+                    renderPodcasts(filteredPodcasts);
+                });
+                
+                console.log('All podcasts rendered successfully');
+            } catch (error) {
+                console.error('Error in fetchPodcasts:', error);
+                podcastList.innerHTML = `<p class="error">Error loading podcasts: ${error.message}</p>`;
+            }
         }
 
-        // Fetch podcast data from GitHub
-        fetch('https://raw.githubusercontent.com/yblebon/datasources/main/podcasts.json') // Replace with your actual GitHub raw JSON URL
-            .then(response => {
-                if (!response.ok) throw new Error('Failed to fetch podcast data');
-                return response.json();
-            })
-            .then(data => {
-                const podcastGrid = document.getElementById('podcast-grid');
-
-                // Create podcast cards dynamically
-                data.forEach(podcast => {
-                    const card = document.createElement('div');
-                    card.className = 'podcast-card';
-                    card.innerHTML = `
-                        <img src="${podcast.cover}" alt="Podcast Cover">
-                        <div class="podcast-content">
-                            <h3>${podcast.title}</h3>
-                            <div class="tags">
-                                ${podcast.tags.map(tag => `<span>${tag}</span>`).join('')}
-                            </div>
-                            <p class="description">${podcast.description}</p>
-                            <div class="audio-controls">
-                                <button class="play-pause">Play</button>
-                                <input type="range" class="volume" min="0" max="1" step="0.1" value="1">
-                                <span class="time-display">0:00 / 0:00</span>
-                                <audio src="${podcast.audio}"></audio>
-                            </div>
-                        </div>
-                    `;
-                    podcastGrid.appendChild(card);
-
-                    // Audio control logic
-                    const audio = card.querySelector('audio');
-                    const playPauseBtn = card.querySelector('.play-pause');
-                    const volumeSlider = card.querySelector('.volume');
-                    const timeDisplay = card.querySelector('.time-display');
-
-                    // Update duration when metadata is loaded
-                    audio.addEventListener('loadedmetadata', () => {
-                        timeDisplay.textContent = `0:00 / ${formatTime(audio.duration)}`;
-                    });
-
-                    // Update current time during playback
-                    audio.addEventListener('timeupdate', () => {
-                        timeDisplay.textContent = `${formatTime(audio.currentTime)} / ${formatTime(audio.duration)}`;
-                    });
-
-                    // Play/Pause toggle
-                    playPauseBtn.addEventListener('click', () => {
-                        if (audio.paused) {
-                            audio.play();
-                            playPauseBtn.textContent = 'Pause';
-                        } else {
-                            audio.pause();
-                            playPauseBtn.textContent = 'Play';
-                        }
-                    });
-
-                    // Volume control
-                    volumeSlider.addEventListener('input', () => {
-                        audio.volume = volumeSlider.value;
-                    });
-
-                    // Reset button text when audio ends
-                    audio.addEventListener('ended', () => {
-                        playPauseBtn.textContent = 'Play';
-                        timeDisplay.textContent = `0:00 / ${formatTime(audio.duration)}`;
-                    });
+        function renderPodcasts(podcasts) {
+            const podcastList = document.getElementById('podcast-list');
+            podcastList.innerHTML = '';
+            
+            if (podcasts.length === 0) {
+                podcastList.innerHTML = `<p class="no-results">No podcasts found for the selected tag.</p>`;
+                return;
+            }
+            
+            podcasts.forEach((podcast, index) => {
+                console.log(`Processing podcast ${index + 1}:`, podcast);
+                const podcastDiv = document.createElement('div');
+                podcastDiv.className = 'podcast';
+                podcastDiv.dataset.tags = Array.isArray(podcast.tags) ? podcast.tags.join(',') : (podcast.tags || 'None');
+                
+                // Map JSON fields
+                const title = podcast.title || 'Untitled';
+                const description = podcast.description || 'No description available';
+                const date = podcast.date || 'Not available';
+                const tags = Array.isArray(podcast.tags) ? podcast.tags : (podcast.tags ? [podcast.tags] : ['None']);
+                const audio = podcast.audio || 'https://www.soundhelix.com/songs/SoundHelix-Song-1.mp3';
+                const cover = podcast.cover || 'https://via.placeholder.com/200';
+                
+                // Log warnings for missing fields
+                if (!podcast.tags) {
+                    console.warn(`Tag field missing for podcast "${title}". Using fallback: None`);
+                }
+                if (!podcast.audio) {
+                    console.warn(`Audio field missing for podcast "${title}". Using placeholder URL: ${audio}`);
+                }
+                
+                // Create unique IDs
+                const audioId = `audio-${index}`;
+                const volumeId = `volume-${index}`;
+                const progressId = `progress-${index}`;
+                
+                console.log(`Mapping for podcast "${title}":`, {
+                    title,
+                    date,
+                    tags,
+                    description,
+                    audio,
+                    cover
                 });
-            })
-            .catch(error => {
-                console.error('Error loading podcasts:', error);
-                document.getElementById('podcast-grid').innerHTML = '<p>Error loading podcasts. Please try again later.</p>';
+                
+                podcastDiv.innerHTML = `
+                    <h2>${title}</h2>
+                    <img src="${cover}" alt="${title} cover">
+                    <p><strong>Description:</strong> ${description}</p>
+                    <p><strong>Date:</strong> ${date}</p>
+                    <p><strong>Tags:</strong> <span class="tags">${tags.map(tag => `<span class="tag">${tag}</span>`).join('')}</span></p>
+                    <div class="audio-controls">
+                        <audio id="${audioId}" src="${audio}"></audio>
+                        <button class="play-pause" aria-label="Play or pause audio" onclick="playPause('${audioId}', this)">
+                            <svg class="play-icon" viewBox="0 0 24 24">
+                                <path d="M8 5v14l11-7z"/>
+                            </svg>
+                            <svg class="pause-icon hidden" viewBox="0 0 24 24">
+                                <path d="M6 19h4V5H6zm8-14v14h4V5z"/>
+                            </svg>
+                        </button>
+                        <div class="volume-control">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/>
+                            </svg>
+                            <input type="range" id="${volumeId}" min="0" max="1" step="0.1" value="1">
+                            <span class="tooltip">Volume: 1.0</span>
+                        </div>
+                        <div class="progress-control">
+                            <input type="range" id="${progressId}" min="0" max="100" step="0.1" value="0">
+                            <span class="progress-time" id="progress-time-${index}">0:00 / Loading...</span>
+                        </div>
+                    </div>
+                `;
+                podcastList.appendChild(podcastDiv);
+                
+                // Set up audio events
+                const audioElement = document.getElementById(audioId);
+                const volumeSlider = document.getElementById(volumeId);
+                const progressSlider = document.getElementById(progressId);
+                const playButton = podcastDiv.querySelector('.play-pause');
+                const playIcon = playButton.querySelector('.play-icon');
+                const pauseIcon = playButton.querySelector('.pause-icon');
+                
+                // Duration and progress
+                audioElement.addEventListener('loadedmetadata', () => {
+                    const duration = formatDuration(audioElement.duration);
+                    console.log(`Duration loaded for audio ${audioId}: ${duration}`);
+                    progressSlider.max = audioElement.duration;
+                    document.getElementById(`progress-time-${index}`).textContent = `0:00 / ${duration}`;
+                });
+                audioElement.addEventListener('timeupdate', () => {
+                    progressSlider.value = audioElement.currentTime;
+                    const currentTime = formatDuration(audioElement.currentTime);
+                    const totalDuration = formatDuration(audioElement.duration);
+                    document.getElementById(`progress-time-${index}`).textContent = `${currentTime} / ${totalDuration}`;
+                    console.log(`Progress updated for audio ${audioId}: ${currentTime}/${totalDuration}`);
+                });
+                audioElement.addEventListener('play', () => {
+                    console.log(`Audio ${audioId} started playing`);
+                    playIcon.classList.add('hidden');
+                    pauseIcon.classList.remove('hidden');
+                });
+                audioElement.addEventListener('pause', () => {
+                    console.log(`Audio ${audioId} paused`);
+                    playIcon.classList.remove('hidden');
+                    pauseIcon.classList.add('hidden');
+                });
+                audioElement.addEventListener('error', (e) => {
+                    console.error(`Audio error for ${audioId}:`, e);
+                });
+                
+                // Volume slider
+                volumeSlider.addEventListener('input', () => {
+                    const newVolume = parseFloat(volumeSlider.value);
+                    audioElement.volume = newVolume;
+                    podcastDiv.querySelector('.tooltip').textContent = `Volume: ${newVolume.toFixed(1)}`;
+                    console.log(`Volume slider changed for audio ${audioId}: ${newVolume.toFixed(1)}`);
+                });
+                
+                // Progress slider
+                progressSlider.addEventListener('input', () => {
+                    audioElement.currentTime = parseFloat(progressSlider.value);
+                    console.log(`Seek to ${formatDuration(audioElement.currentTime)} for audio ${audioId}`);
+                });
             });
+        }
+
+        // Play or pause audio
+        function playPause(audioId, button) {
+            console.log(`playPause called for audio ${audioId}`);
+            const audio = document.getElementById(audioId);
+            const playIcon = button.querySelector('.play-icon');
+            const pauseIcon = button.querySelector('.pause-icon');
+            if (audio.paused) {
+                audio.play().then(() => {
+                    console.log(`Audio ${audioId} play initiated`);
+                    playIcon.classList.add('hidden');
+                    pauseIcon.classList.remove('hidden');
+                }).catch(err => {
+                    console.error(`Error playing audio ${audioId}:`, err);
+                });
+            } else {
+                audio.pause();
+                console.log(`Audio ${audioId} pause initiated`);
+                playIcon.classList.remove('hidden');
+                pauseIcon.classList.add('hidden');
+            }
+        }
+
+        // Format duration in MM:SS
+        function formatDuration(seconds) {
+            if (isNaN(seconds)) return '0:00';
+            const minutes = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            const formatted = `${minutes}:${secs < 10 ? '0' : ''}${secs}`;
+            console.log(`Formatted duration: ${seconds} seconds -> ${formatted}`);
+            return formatted;
+        }
+
+        // Fetch podcasts when the page loads
+        console.log('Page load initiated at', new Date().toISOString());
+        window.onload = fetchPodcasts;
     </script>
 </body>
 </html>
